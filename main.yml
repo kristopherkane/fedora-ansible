@@ -1,0 +1,43 @@
+---
+- hosts: localhost
+  vars:
+    intellij_download_url: http://download-cf.jetbrains.com/idea/ideaIC-2017.3.4.tar.gz
+    intellij_install_dir: /opt/intellij
+    intellij_download_dest: /tmp/intellij.tar.gz
+
+  tasks: 
+  - stat: path='{{ intellij_download_dest }}' 
+    register: intellij_downloaded
+
+  - name: Install packages
+    become: yes
+    dnf: name=openssh-server,libselinux-python,htop,iftop,vim,wget,curl state=present
+
+  - name: Start sshd
+    become: yes
+    service: 
+      name: sshd.service
+      state: started
+
+  - name: download IntelliJ IDEA
+    get_url:
+      url: '{{ intellij_download_url }}'
+      dest: '/tmp/intellij.tar.gz'
+      timeout: 60
+      mode: 'u=rw,go=r'
+    when: intellij_downloaded.stat.exists == False
+
+  - name: create software directory
+    become: yes
+    file: 
+      state: directory
+      owner: root 
+      group: root 
+      mode: 'u=rwx,go=rx'
+      dest: '{{ intellij_install_dir }}' 
+  
+  - name: Install IntelliJ
+    become: yes
+    unarchive: 
+      src: '{{ intellij_download_dest }}'
+      dest: '{{ intellij_install_dir }}'
