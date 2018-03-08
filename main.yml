@@ -11,7 +11,7 @@
 
   - name: Install packages
     become: yes
-    dnf: name=openssh-server,libselinux-python,htop,iftop,vim,wget,curl state=present
+    dnf: name=java-1.8.0-openjdk-devel,maven,openssh-server,libselinux-python,htop,iftop,vim,wget,curl state=present
 
   - name: Start sshd
     become: yes
